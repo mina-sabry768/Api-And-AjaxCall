@@ -1,0 +1,108 @@
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
+using WebApp_Products.Data;
+using WebApp_Products.Models;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+namespace WebApp_Products.Controllers
+{
+    [Route("api/Categories")]
+    [ApiController]
+    [EnableCors("CorsPolicy")]
+    public class CategoriesController : ControllerBase
+    {
+        private readonly ApplicationDbContext _context;
+
+        public CategoriesController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+        [HttpGet("GetCategory")]
+        public IActionResult GetCategory()
+        {
+            try
+            {
+
+                return Ok(_context.Categories.OrderBy(x => x.Name).ToList());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+
+        [HttpGet("GetById/{id}")]
+        public IActionResult GetById(int id)
+        {
+            try
+            {
+
+                return Ok(_context.Categories.FirstOrDefault(x => x.Id == id));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("Save")]
+        public IActionResult Save([FromBody] Category model)
+        {
+            try
+            {
+                _context.Categories.Add(model);
+                _context.SaveChanges();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpPut("Update/{id}")]
+        public IActionResult Update(int id, [FromBody] Category model)
+        {
+            try
+            {
+                var Result = _context.Categories.FirstOrDefault(x => x.Id == id);
+                if (Result != null)
+                {
+                    Result.Name = model.Name;
+                    _context.Categories.Update(Result);
+                    _context.SaveChanges();
+                    return Ok(Result);
+                }
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                var Result = _context.Categories.FirstOrDefault(x => x.Id == id);
+                if (Result != null)
+                {
+                    _context.Categories.Remove(Result);
+                    _context.SaveChanges();
+                    return Ok(Result);
+                }
+                return BadRequest(Result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+    }
+}
